@@ -8,22 +8,60 @@
 #include "stop.h"
 
 /**
- * @brief Represents a single bus line.
+ * @brief Represents a single line.
  */
 class Line
 {
 private:
-    int line_num;                   /**< The line's identification number. */
-    int version;                    /**< The version of the line. */
+    int line_num; /**< The line's identification number. */
 public:
-    Line() : line_num(0), version(0) {}
-    Line(int line_num, int version) : line_num(line_num), version(version) {}
+    Line() : line_num(0) {}
+    Line(int line_num) : line_num(line_num) {}
+    virtual ~Line() = default;
+    
+    virtual std::string get_type() const { return "Generikus járat"; }
+
     int get_line_num() const { return line_num; }
-    int get_version() const { return version; }
     bool operator==(const Line &other) const
     {
-        return line_num == other.line_num && version == other.version;
+        return line_num == other.line_num;
     }
+};
+
+class Bus : public Line
+{
+public:
+    Bus() : Line() {}
+    Bus(int line_num) : Line(line_num) {}
+    
+    std::string get_type() const override { return "Busz"; }
+};
+
+class Tram : public Line
+{
+public:
+    Tram() : Line() {}
+    Tram(int line_num) : Line(line_num) {}
+    
+    std::string get_type() const override { return "Villamos"; }
+};
+
+class Train : public Line
+{
+public:
+    Train() : Line() {}
+    Train(int line_num) : Line(line_num) {}
+    
+    std::string get_type() const override { return "Vonat"; }
+};
+
+class HEV : public Line
+{
+public:
+    HEV() : Line() {}
+    HEV(int line_num) : Line(line_num) {}
+    
+    std::string get_type() const override { return "HÉV"; }
 };
 
 class LineManager
@@ -36,7 +74,7 @@ public:
     int process(const std::string &filepath);
     int write_to_file(const std::string &filepath) const;
     void list() const;
-    void list_line(int line_num, int version) const;
+    void list_line(int line_num) const;
     int find_index(const Line &line) const;
     bool contains(const Line &line) const;
     int add(const Line &line);
