@@ -15,10 +15,19 @@ private:
 public:
     Stop() : name("") {}
     Stop(const std::string &name) : name(name) {}
+    const Stop& get() { return *this; }
     const std::string &get_name() const { return name; }
     bool operator==(const Stop &other) const
     {
         return name == other.name;
+    }
+    bool operator!=(const Stop &other) const
+    {
+        return !(*this == other);
+    }
+    operator bool() const
+    {
+        return !name.empty();
     }
 };
 
@@ -30,6 +39,12 @@ public:
     StopManager() : stoplist() {}
     StopManager(const std::vector<std::shared_ptr<Stop>> &stops) : stoplist(stops) {}
     const std::vector<std::shared_ptr<Stop>> &get_stoplist() const { return stoplist; }
+    const std::shared_ptr<Stop> operator[](int index) const
+    {
+        if (index < 0 || index >= stoplist.size())
+            return nullptr;
+        return stoplist[index];
+    }
     /**
      * @brief Loads stops from a text file into the stop list.
      *
@@ -66,6 +81,8 @@ public:
      * @return True if the stop is found, false otherwise.
      */
     bool contains(const Stop &stop) const;
+
+    const std::shared_ptr<Stop> get_stop_by_name(const std::string &stopname) const;
 
     /**
      * @brief Adds a new stop to the list.

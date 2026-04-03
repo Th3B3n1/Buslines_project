@@ -12,13 +12,26 @@
 class Schedule
 {
 private:
-    std::vector<std::shared_ptr<Line>> line; /**< Pointer to the associated bus line. */
+    std::shared_ptr<Line> line; /**< Pointer to the associated bus line. */
     std::chrono::system_clock::time_point start;                         /**< The starting date and time of the schedule. */
 public:
     Schedule() : line(), start() {}
-    Schedule(const std::vector<std::shared_ptr<Line>> &line, const std::chrono::system_clock::time_point &start) : line(line), start(start) {}
-    const std::vector<std::shared_ptr<Line>> &get_line() const { return line; }
+    Schedule(const std::shared_ptr<Line> &line, const std::chrono::system_clock::time_point &start) : line(line), start(start) {}
+    const std::shared_ptr<Line> &get_line() const { return line; }
     const std::chrono::system_clock::time_point &get_start() const { return start; }
+    bool operator==(const Schedule &other) const
+    {
+        if (!line || !other.line) return false;
+        return *line == *other.line && start == other.start;
+    }
+    bool operator!=(const Schedule &other) const
+    {
+        return !(*this == other);
+    }
+    operator bool() const
+    {
+        return line != nullptr && start.time_since_epoch().count() > 0;
+    }
 };
 
 class ScheduleManager

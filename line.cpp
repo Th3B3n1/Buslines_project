@@ -17,27 +17,27 @@ int LineManager::process(const std::string &filepath)
 		if (type_str == "Bus")
 		{
 			Bus bus = Bus(std::stoi(line_num_str));
-			linelist.push_back(std::make_shared<Bus>(bus));
+			add(bus);
 		}
 		else if (type_str == "Tram")
 		{
 			Tram tram = Tram(std::stoi(line_num_str));
-			linelist.push_back(std::make_shared<Tram>(tram));
+			add(tram);
 		}
 		else if (type_str == "Train")
 		{
 			Train train = Train(std::stoi(line_num_str));
-			linelist.push_back(std::make_shared<Train>(train));
+			add(train);
 		}
 		else if (type_str == "HEV")
 		{
 			HEV hev = HEV(std::stoi(line_num_str));
-			linelist.push_back(std::make_shared<HEV>(hev));
+			add(hev);
 		}
 		else
 		{
 			Line line = Line(std::stoi(line_num_str));
-			linelist.push_back(std::make_shared<Line>(line));
+			add(line);
 		}
 	}
 	file.close();
@@ -74,6 +74,8 @@ void LineManager::list_line(int line_num) const
 {
 	if (linelist.empty())
 		return;
+	if (line_num <= 0)
+		return;
 	bool found = false;
 	for (int i = 0; i < linelist.size(); i++)
 	{
@@ -96,7 +98,7 @@ int LineManager::find_index(const Line &line) const
 {
 	if (linelist.empty())
 		return -2;
-	if (line == Line())
+	if (!line)
 		return -2;
 	for (int i = 0; i < linelist.size(); i++)
 	{
@@ -112,7 +114,7 @@ bool LineManager::contains(const Line &line) const
 {
 	if (linelist.empty())
 		return false;
-	if (line == Line())
+	if (!line)
 		return false;
 	for (int i = 0; i < linelist.size(); i++)
 	{
@@ -122,6 +124,16 @@ bool LineManager::contains(const Line &line) const
 		}
 	}
 	return false;
+}
+
+const std::shared_ptr<Line> LineManager::get_line_by_number(int line_num) const
+{
+	int index = find_index(Line(line_num));
+	if (index < 0)
+	{
+		return nullptr;
+	}
+	return linelist[index];
 }
 
 int LineManager::add(const Line &line)

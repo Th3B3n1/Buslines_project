@@ -10,7 +10,7 @@ int StopManager::process(const std::string &filepath)
 	{
 		if (unprocessed.empty())
 			continue;
-		stoplist.push_back(std::make_shared<Stop>(unprocessed));
+		add(unprocessed);
 	}
 	file.close();
 	return 0;
@@ -67,6 +67,16 @@ bool StopManager::contains(const Stop &stop) const
 		}
 	}
 	return false;
+}
+
+const std::shared_ptr<Stop> StopManager::get_stop_by_name(const std::string &stopname) const
+{
+	int index = find_index(stopname);
+	if (index < 0)
+	{
+		return nullptr;
+	}
+	return stoplist[index];
 }
 
 int StopManager::add(const std::string &stopname)
