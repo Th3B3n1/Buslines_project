@@ -1,10 +1,10 @@
 #include "line.h"
 
-int LineManager::process(const std::string &filepath)
+bool LineManager::process(const std::string &filepath)
 {
 	std::ifstream file(filepath);
 	if (!file.is_open())
-		return -2;
+		return false;
 	std::string unprocessed;
 	while (std::getline(file, unprocessed))
 	{
@@ -41,27 +41,27 @@ int LineManager::process(const std::string &filepath)
 		}
 	}
 	file.close();
-	return 0;
+	return true;
 }
 
-int LineManager::write_to_file(const std::string &filepath) const
+bool LineManager::write_to_file(const std::string &filepath) const
 {
+	if (linelist.empty())
+		return false;
 	std::ofstream file(filepath);
 	if (!file.is_open())
-		return -2;
-	for (int i = 0; i < linelist.size(); i++)
+		return false;
+	for (size_t i = 0; i < linelist.size(); i++)
 	{
 		file << linelist[i]->get_line_num() << std::endl;
 	}
 	file.close();
-	return 0;
+	return true;
 }
 
 void LineManager::list() const
 {
-	if (linelist.empty())
-		return;
-	for (int i = 0; i < linelist.size(); i++)
+	for (size_t i = 0; i < linelist.size(); i++)
 	{
 		std::cout << "----------------------" << std::endl;
 		std::cout << "Jarat: " << linelist[i]->get_line_num() << std::endl;
@@ -72,12 +72,10 @@ void LineManager::list() const
 
 void LineManager::list_line(int line_num) const
 {
-	if (linelist.empty())
-		return;
 	if (line_num <= 0)
 		return;
 	bool found = false;
-	for (int i = 0; i < linelist.size(); i++)
+	for (size_t i = 0; i < linelist.size(); i++)
 	{
 		if (*linelist[i] == Line(line_num))
 		{
@@ -94,29 +92,25 @@ void LineManager::list_line(int line_num) const
 	}
 }
 
-int LineManager::find_index(const Line &line) const
+size_t LineManager::find_index(const Line &line) const
 {
-	if (linelist.empty())
-		return -2;
 	if (!line)
-		return -2;
-	for (int i = 0; i < linelist.size(); i++)
+		return std::string::npos;
+	for (size_t i = 0; i < linelist.size(); i++)
 	{
 		if (*linelist[i] == line)
 		{
 			return i;
 		}
 	}
-	return -1;
+	return std::string::npos;
 }
 
 bool LineManager::contains(const Line &line) const
 {
-	if (linelist.empty())
-		return false;
 	if (!line)
 		return false;
-	for (int i = 0; i < linelist.size(); i++)
+	for (size_t i = 0; i < linelist.size(); i++)
 	{
 		if (*linelist[i] == line)
 		{
@@ -128,7 +122,7 @@ bool LineManager::contains(const Line &line) const
 
 const std::shared_ptr<Line> LineManager::get_line_by_number(int line_num) const
 {
-	int index = find_index(Line(line_num));
+	size_t index = find_index(Line(line_num));
 	if (index < 0)
 	{
 		return nullptr;
@@ -136,23 +130,23 @@ const std::shared_ptr<Line> LineManager::get_line_by_number(int line_num) const
 	return linelist[index];
 }
 
-int LineManager::add(const Line &line)
+bool LineManager::add(const Line &line)
 {
 	if (linelist.empty())
-		return -2;
+		return false;
 	if (contains(line))
-		return -1;
+		return false;
 	linelist.push_back(std::make_shared<Line>(line));
-	return 0;
+	return true;
 }
 
-int LineManager::remove(const Line &line)
+bool LineManager::remove(const Line &line)
 {
 	if (linelist.empty())
-		return -2;
-	int lineindex = find_index(line);
-	if (lineindex == -1)
-		return -1;
+		return false;
+	size_t lineindex = find_index(line);
+	if (lineindex == std::string::npos)
+		return false;
 	linelist.erase(linelist.begin() + lineindex);
-	return 0;
+	return true;
 }

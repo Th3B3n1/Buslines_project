@@ -1,10 +1,10 @@
 #include "stop.h"
 
-int StopManager::process(const std::string &filepath)
+bool StopManager::process(const std::string &filepath)
 {
 	std::ifstream file(filepath);
 	if (!file.is_open())
-		return -2;
+		return false;
 	std::string unprocessed;
 	while (std::getline(file, unprocessed))
 	{
@@ -13,53 +13,47 @@ int StopManager::process(const std::string &filepath)
 		add(unprocessed);
 	}
 	file.close();
-	return 0;
+	return true;
 }
 
-int StopManager::write_to_file(const std::string &filepath) const
+bool StopManager::write_to_file(const std::string &filepath) const
 {
 	if (stoplist.empty())
-		return -2;
+		return false;
 	std::ofstream file(filepath);
 	if (!file.is_open())
-		return -2;
-	for (int i = 0; i < stoplist.size(); i++)
+		return false;
+	for (size_t i = 0; i < stoplist.size(); i++)
 	{
 		file << stoplist[i]->get_name() << std::endl;
 	}
 	file.close();
-	return 0;
+	return true;
 }
 
 void StopManager::list() const
 {
-	if (stoplist.empty())
-		return;
-	for (int i = 0; i < stoplist.size(); i++)
+	for (size_t i = 0; i < stoplist.size(); i++)
 	{
 		std::cout << stoplist[i]->get_name() << std::endl;
 	}
 }
 
-int StopManager::find_index(const std::string &stopname) const
+size_t StopManager::find_index(const std::string &stopname) const
 {
-	if (stoplist.empty())
-		return -2;
-	for (int i = 0; i < stoplist.size(); i++)
+	for (size_t i = 0; i < stoplist.size(); i++)
 	{
 		if (stoplist[i]->get_name() == stopname)
 		{
 			return i;
 		}
 	}
-	return -1;
+	return std::string::npos;
 }
 
 bool StopManager::contains(const Stop &stop) const
 {
-	if (stoplist.empty())
-		return false;
-	for (int i = 0; i < stoplist.size(); i++)
+	for (size_t i = 0; i < stoplist.size(); i++)
 	{
 		if (*stoplist[i] == stop)
 		{
@@ -71,32 +65,26 @@ bool StopManager::contains(const Stop &stop) const
 
 const std::shared_ptr<Stop> StopManager::get_stop_by_name(const std::string &stopname) const
 {
-	int index = find_index(stopname);
-	if (index < 0)
-	{
+	size_t index = find_index(stopname);
+	if (index == std::string::npos)
 		return nullptr;
-	}
 	return stoplist[index];
 }
 
-int StopManager::add(const std::string &stopname)
+bool StopManager::add(const std::string &stopname)
 {
-	if (stoplist.empty())
-		return -2;
 	Stop newstop(stopname);
 	if (contains(newstop))
-		return -1;
+		return false;
 	stoplist.push_back(std::make_shared<Stop>(newstop));
-	return 0;
+	return true;
 }
 
-int StopManager::remove(const std::string &stopname)
+bool StopManager::remove(const std::string &stopname)
 {
-	if (stoplist.empty())
-		return -2;
-	int stopindex = find_index(stopname);
-	if (stopindex == -1)
-		return -1;
+	size_t stopindex = find_index(stopname);
+	if (stopindex == std::string::npos)
+		return false;
 	stoplist.erase(stoplist.begin() + stopindex);
-	return 0;
+	return true;
 }

@@ -51,17 +51,17 @@ public:
      * The file must contain one stop name per line.
      *
      * @param filepath Path to the file containing the stop names.
-     * @return 0 on success, -2 on file or memory error.
+     * @return true on success, false on file or memory error.
      */
-    int process(const std::string &filepath);
+    bool process(const std::string &filepath);
 
     /**
      * @brief Writes all stops in the list to a file, one per line.
      *
      * @param filepath Output file path.
-     * @return 0 on success, -2 on file error.
+     * @return true on success, false on file error.
      */
-    int write_to_file(const std::string &filepath) const;
+    bool write_to_file(const std::string &filepath) const;
 
     /**
      * @brief Prints all stops in the list to stdout.
@@ -70,7 +70,7 @@ public:
      */
     void list() const;
 
-    int find_index(const std::string &stopname) const;
+    size_t find_index(const std::string &stopname) const;
 
     /**
      * @brief Checks if a stop exists in the list.
@@ -78,7 +78,7 @@ public:
      * Performs a linear search through the list.
      *
      * @param stop Stop to search for.
-     * @return True if the stop is found, false otherwise.
+     * @return true if the stop is found, false otherwise.
      */
     bool contains(const Stop &stop) const;
 
@@ -90,15 +90,15 @@ public:
      * The stopname is stored directly without copying. Caller must ensure it remains valid.
      *
      * @param stopname String containing the stop name. Must be valid until removed from list.
-     * @return 0 on success, -1 if already exists, -2 if error.
+     * @return true on success, false if already exists.
      */
-    int add(const std::string &stopname);
+    bool add(const std::string &stopname);
 
     /**
      * @brief Removes a stop from the list by name.
      *
      * @param stopname Name of the stop to remove.
-     * @return 0 on success, -1 if not found, -2 if error.
+     * @return true on success, false if not found.
      */
-    int remove(const std::string &stopname);
+    bool remove(const std::string &stopname);
 };

@@ -84,13 +84,13 @@ public:
             return nullptr;
         return linelist[index];
     }
-    int process(const std::string &filepath);
-    int write_to_file(const std::string &filepath) const;
+    bool process(const std::string &filepath);
+    bool write_to_file(const std::string &filepath) const;
     void list() const;
     void list_line(int line_num) const;
-    int find_index(const Line &line) const;
+    size_t find_index(const Line &line) const;
     bool contains(const Line &line) const;
     const std::shared_ptr<Line> get_line_by_number(int line_num) const;
-    int add(const Line &line);
-    int remove(const Line &line);
+    bool add(const Line &line);
+    bool remove(const Line &line);
 };
