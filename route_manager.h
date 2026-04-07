@@ -22,6 +22,10 @@ public:
         if (!stop || !line || !other.stop || !other.line) return false;
         return *stop == *other.stop && *line == *other.line;
     }
+    bool operator!=(const Connection &other) const
+    {
+        return !(*this == other);
+    }
     operator bool() const
     {
         return stop != nullptr && line != nullptr;
@@ -37,11 +41,12 @@ private:
 
 public:
     RouteManager(StopManager& sm, LineManager& lm) : connections(), stopManager(sm), lineManager(lm) {}
-    int process(const std::string &filepath);
-    int find_index(const Connection &conn) const;
+    bool process(const std::string &filepath);
+    bool write_to_file(const std::string &filepath);
+    size_t find_index(const Connection &conn) const;
     bool contains(const Connection &conn) const;
-    int add(const std::shared_ptr<Stop> &stop, const std::shared_ptr<Line> &line, int travel_time_minutes);
-    int remove(const std::shared_ptr<Stop> &stop, const std::shared_ptr<Line> &line);
+    bool add(const std::shared_ptr<Stop> &stop, const std::shared_ptr<Line> &line, int travel_time_minutes);
+    bool remove(const std::shared_ptr<Stop> &stop, const std::shared_ptr<Line> &line);
     std::vector<Connection> find_connections_by_stop(const std::shared_ptr<Stop> &stop) const;
     std::vector<Connection> find_connections_by_line(const std::shared_ptr<Line> &line) const;
 };

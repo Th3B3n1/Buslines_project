@@ -39,11 +39,11 @@ void StopManager::list() const
 	}
 }
 
-size_t StopManager::find_index(const std::string &stopname) const
+size_t StopManager::find_index(const Stop &stop) const
 {
 	for (size_t i = 0; i < stoplist.size(); i++)
 	{
-		if (stoplist[i]->get_name() == stopname)
+		if (*stoplist[i] == stop)
 		{
 			return i;
 		}
@@ -71,18 +71,17 @@ const std::shared_ptr<Stop> StopManager::get_stop_by_name(const std::string &sto
 	return stoplist[index];
 }
 
-bool StopManager::add(const std::string &stopname)
+bool StopManager::add(const Stop &stop)
 {
-	Stop newstop(stopname);
-	if (contains(newstop))
+	if (contains(stop))
 		return false;
-	stoplist.push_back(std::make_shared<Stop>(newstop));
+	stoplist.push_back(std::make_shared<Stop>(stop));
 	return true;
 }
 
-bool StopManager::remove(const std::string &stopname)
+bool StopManager::remove(const Stop &stop)
 {
-	size_t stopindex = find_index(stopname);
+	size_t stopindex = find_index(stop);
 	if (stopindex == std::string::npos)
 		return false;
 	stoplist.erase(stoplist.begin() + stopindex);

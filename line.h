@@ -78,9 +78,9 @@ private:
 public:
     LineManager() : linelist() {}
     const std::vector<std::shared_ptr<Line>> &get_linelist() const { return linelist; }
-    const std::shared_ptr<Line> &operator[](int index) const
+    const std::shared_ptr<Line> operator[](size_t index) const
     {
-        if (index < 0 || index >= linelist.size())
+        if (index >= linelist.size())
             return nullptr;
         return linelist[index];
     }

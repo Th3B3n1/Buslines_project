@@ -39,9 +39,9 @@ public:
     StopManager() : stoplist() {}
     StopManager(const std::vector<std::shared_ptr<Stop>> &stops) : stoplist(stops) {}
     const std::vector<std::shared_ptr<Stop>> &get_stoplist() const { return stoplist; }
-    const std::shared_ptr<Stop> operator[](int index) const
+    const std::shared_ptr<Stop> operator[](size_t index) const
     {
-        if (index < 0 || index >= stoplist.size())
+        if (index >= stoplist.size())
             return nullptr;
         return stoplist[index];
     }
@@ -70,7 +70,7 @@ public:
      */
     void list() const;
 
-    size_t find_index(const std::string &stopname) const;
+    size_t find_index(const Stop &stop) const;
 
     /**
      * @brief Checks if a stop exists in the list.
@@ -92,7 +92,7 @@ public:
      * @param stopname String containing the stop name. Must be valid until removed from list.
      * @return true on success, false if already exists.
      */
-    bool add(const std::string &stopname);
+    bool add(const Stop &stop);
 
     /**
      * @brief Removes a stop from the list by name.
@@ -100,5 +100,5 @@ public:
      * @param stopname Name of the stop to remove.
      * @return true on success, false if not found.
      */
-    bool remove(const std::string &stopname);
+    bool remove(const Stop &stop);
 };
