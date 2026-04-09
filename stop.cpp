@@ -33,10 +33,12 @@ bool StopManager::write_to_file(const std::string &filepath) const
 
 void StopManager::list() const
 {
+	std::cout << "----------------------" << std::endl;
 	for (size_t i = 0; i < stoplist.size(); i++)
 	{
 		std::cout << stoplist[i]->get_name() << std::endl;
 	}
+	std::cout << "----------------------" << std::endl;
 }
 
 size_t StopManager::find_index(const Stop &stop) const

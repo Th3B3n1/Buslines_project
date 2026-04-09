@@ -1,21 +1,28 @@
 #include "menu.h"
 
-void Menu::stop_menu()
+int Menu::get_choice()
 {
-	int choice = -1;
+	int choice;
 	std::cin >> choice;
 	if (std::cin.fail())
 	{
 		std::cin.clear();
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		std::cout << "Nem megfelelo input." << std::endl;
-		return;
+		return -1;
 	}
 	std::cin.ignore();
-	switch (choice)
+	return choice;
+}
+
+void Menu::stop_menu()
+{
+	switch (get_choice())
 	{
-	case 1: {
-		std::cout << "Adja meg a megallo nevet: " << std::endl;
+	case 1:
+	{
+		std::cout << "----------------------" << std::endl;
+		std::cout << "Adja meg a megallo nevet: ";
 		std::string stopname_to_create;
 		std::getline(std::cin, stopname_to_create);
 		bool creation = stops.add(Stop(stopname_to_create));
@@ -29,27 +36,31 @@ void Menu::stop_menu()
 		}
 		break;
 	}
-	case 2: {
+	case 2:
+	{
+		std::cout << "----------------------" << std::endl;
 		std::cout << "A megallok listaja:" << std::endl;
 		stops.list();
-		std::cout << "----------------------" << std::endl;
 		break;
 	}
-	case 3: {
-		std::cout << "Adja meg a torlendo megallo nevet: " << std::endl;
+	case 3:
+	{
+		std::cout << "----------------------" << std::endl;
+		std::cout << "Adja meg a torlendo megallo nevet: ";
 		std::string stopname_to_delete;
 		std::getline(std::cin, stopname_to_delete);
-		
+
 		std::shared_ptr<Stop> pStop = stops.get_stop_by_name(stopname_to_delete);
-		if (!pStop) {
+		if (!pStop)
+		{
 			std::cout << "Sikertelen megallo torles. Ilyen megallo nem letezik." << std::endl;
 			break;
 		}
-		
+
 		std::vector<Connection> connected_routes = routes.find_connections_by_connectionstop(pStop);
 		if (!connected_routes.empty())
 		{
-			std::cout << "A megallo szerepel egy vagy tobb jaratban. Biztosan torli? (i/n)" << std::endl;
+			std::cout << "A megallo szerepel egy vagy tobb jaratban. Biztosan torli? (i/n) ";
 			char confirm = std::cin.get();
 			std::cin.ignore();
 			if (confirm != 'i' && confirm != 'I')
@@ -76,21 +87,13 @@ void Menu::stop_menu()
 
 void Menu::line_menu()
 {
-	int choice = -1;
-	std::cin >> choice;
-	if (std::cin.fail())
+	switch (get_choice())
 	{
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		std::cout << "Nem megfelelo input." << std::endl;
-		return;
-	}
-	std::cin.ignore();
-	switch (choice)
+	case 1:
 	{
-	case 1: {
 		int line_num;
-		std::cout << "Adja meg a jarat szamat: " << std::endl;
+		std::cout << "----------------------" << std::endl;
+		std::cout << "Adja meg a jarat szamat: ";
 		std::cin >> line_num;
 		if (std::cin.fail() || line_num < 0)
 		{
@@ -101,26 +104,41 @@ void Menu::line_menu()
 		}
 		std::cin.ignore();
 		std::string type;
-		std::cout << "Adja meg a jarat tipusat: " << std::endl;
+		std::cout << "Adja meg a jarat tipusat: ";
 		std::getline(std::cin, type);
 		if (type.empty())
 		{
 			std::cout << "Nem megfelelo input." << std::endl;
 			break;
 		}
-		
+
 		if (lines.contains(Line(line_num)))
 		{
 			std::cout << "Mar letezik ilyen jarat." << std::endl;
 			break;
 		}
-		
+
 		bool created = false;
-		if (type == "Bus") { created = lines.add(Bus(line_num)); }
-		else if (type == "Tram") { created = lines.add(Tram(line_num)); }
-		else if (type == "Train") { created = lines.add(Train(line_num)); }
-		else if (type == "HEV") { created = lines.add(HEV(line_num)); }
-		else { created = lines.add(Line(line_num, type)); }
+		if (type == "Bus")
+		{
+			created = lines.add(Bus(line_num));
+		}
+		else if (type == "Tram")
+		{
+			created = lines.add(Tram(line_num));
+		}
+		else if (type == "Train")
+		{
+			created = lines.add(Train(line_num));
+		}
+		else if (type == "HEV")
+		{
+			created = lines.add(HEV(line_num));
+		}
+		else
+		{
+			created = lines.add(Line(line_num, type));
+		}
 
 		if (!created)
 		{
@@ -134,21 +152,21 @@ void Menu::line_menu()
 			std::cout << "Sikertelen jarat letrehozas." << std::endl;
 			break;
 		}
-		
+
 		while (true)
 		{
-			std::cout << "Adja meg a megallo nevet (befejezeshez 0-at irjon be): " << std::endl;
+			std::cout << "Adja meg a megallo nevet (befejezeshez 0-at irjon be): ";
 			std::string stopname;
 			std::getline(std::cin, stopname);
 			if (stopname == "0")
 			{
 				break;
 			}
-			
+
 			std::shared_ptr<Stop> pStop = stops.get_stop_by_name(stopname);
 			if (!pStop)
 			{
-				std::cout << "A(z) " << stopname << " megallo nem talalhato az adatbazisba, hozzaadjam uj megallokent? (i/n)" << std::endl;
+				std::cout << "A(z) " << stopname << " megallo nem talalhato az adatbazisba, hozzaadjam uj megallokent? (i/n) ";
 				char confirm = std::cin.get();
 				std::cin.ignore();
 				if (confirm == 'i' || confirm == 'I')
@@ -170,8 +188,8 @@ void Menu::line_menu()
 					continue;
 				}
 			}
-			
-			std::cout << "Adja meg az idot a terminusztol percekben: " << std::endl;
+
+			std::cout << "Adja meg az idot a terminusztol percekben: ";
 			int time_minutes;
 			std::cin >> time_minutes;
 			if (std::cin.fail() || time_minutes < 0)
@@ -182,7 +200,7 @@ void Menu::line_menu()
 				break;
 			}
 			std::cin.ignore();
-			
+
 			if (!current_line->add_stop(pStop, time_minutes))
 			{
 				std::cout << "Nem megfelelo formatum." << std::endl;
@@ -190,28 +208,32 @@ void Menu::line_menu()
 			}
 		}
 		routes.rebuild();
-		
+
 		std::cout << "Sikeres jarat letrehozas." << std::endl;
 		break;
 	}
-	case 2: {
+	case 2:
+	{
+		std::cout << "----------------------" << std::endl;
 		std::cout << "A jaratok listaja:" << std::endl;
 		lines.list();
-		std::cout << "----------------------" << std::endl;
 		break;
 	}
-	case 3: {
-		std::cout << "Adja meg a torlendo jarat szamat: " << std::endl;
+	case 3:
+	{
+		std::cout << "----------------------" << std::endl;
+		std::cout << "Adja meg a torlendo jarat szamat: ";
 		int line_to_delete;
 		std::cin >> line_to_delete;
-		if (std::cin.fail() || line_to_delete < 0) {
+		if (std::cin.fail() || line_to_delete < 0)
+		{
 			std::cin.clear();
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			std::cout << "Nem megfelelo jarat szam." << std::endl;
 			break;
 		}
 		std::cin.ignore();
-		
+
 		bool deletion_code = lines.remove(Line(line_to_delete));
 		if (deletion_code)
 		{
@@ -224,11 +246,14 @@ void Menu::line_menu()
 		}
 		break;
 	}
-	case 4: {
+	case 4:
+	{
 		int line_num = 0;
-		std::cout << "Adja meg a jarat szamat: " << std::endl;
+		std::cout << "----------------------" << std::endl;
+		std::cout << "Adja meg a jarat szamat: ";
 		std::cin >> line_num;
-		if (std::cin.fail() || line_num < 0) {
+		if (std::cin.fail() || line_num < 0)
+		{
 			std::cin.clear();
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			std::cout << "Nem megfelelo jarat szam." << std::endl;
@@ -245,37 +270,29 @@ void Menu::line_menu()
 
 void Menu::schedule_menu()
 {
-	int choice = -1;
-	std::cin >> choice;
-	if (std::cin.fail())
+	switch (get_choice())
 	{
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		std::cout << "Nem megfelelo input." << std::endl;
-		return;
-	}
-	std::cin.ignore();
-
-	switch (choice)
+	case 1:
 	{
-	case 1: {
-		std::cout << "Adja meg a jarat szamat: " << std::endl;
+		std::cout << "----------------------" << std::endl;
+		std::cout << "Adja meg a jarat szamat: ";
 		int line_num;
 		std::cin >> line_num;
-		if (std::cin.fail()) {
-			std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		if (std::cin.fail())
+		{
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			return;
 		}
 		std::cin.ignore();
-		
+
 		std::shared_ptr<Line> pLine = lines.get_line_by_number(line_num);
 		if (pLine != nullptr)
 		{
-			std::cout << "Adja meg az indulasi datumot az alabbi formaba:" << std::endl;
-			std::cout << "[YYYY-MM-DD HH:MM:SS]" << std::endl;
+			std::cout << "Adja meg az indulasi datumot [YYYY-MM-DD HH:MM:SS]: ";
 			std::string date_str;
 			std::getline(std::cin, date_str);
-			
+
 			std::tm t = {};
 			std::stringstream ss_dep(date_str);
 			ss_dep >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
@@ -285,21 +302,27 @@ void Menu::schedule_menu()
 				return;
 			}
 			std::chrono::system_clock::time_point date = std::chrono::system_clock::from_time_t(std::mktime(&t));
-			
-			std::cout << "Adja meg a vegallomas nevet: " << std::endl;
+
+			std::cout << "Adja meg a vegallomas nevet: ";
 			std::string last_stop;
 			std::getline(std::cin, last_stop);
 			std::shared_ptr<Stop> pLastStop = stops.get_stop_by_name(last_stop);
-			
-			if (pLastStop != nullptr) {
+
+			if (pLastStop != nullptr)
+			{
 				Schedule schedule(pLine, date, pLastStop);
 				bool creation_code = schedules.add(schedule);
-				if (creation_code) {
+				if (creation_code)
+				{
 					std::cout << "Sikeres menetrend letrehozas." << std::endl;
-				} else {
+				}
+				else
+				{
 					std::cout << "Sikertelen menetrend letrehozas. Ilyen menetrend mar letezik." << std::endl;
 				}
-			} else {
+			}
+			else
+			{
 				std::cout << "Nem letezik a megadott vegallomas." << std::endl;
 			}
 		}
@@ -310,28 +333,31 @@ void Menu::schedule_menu()
 		break;
 	}
 	case 2:
+		std::cout << "----------------------" << std::endl;
 		std::cout << "A menetrendek listaja:" << std::endl;
 		schedules.list();
-		std::cout << "----------------------" << std::endl;
 		break;
-	case 3: {
-		std::cout << "Adja meg a jarat szamat: " << std::endl;
+	case 3:
+	{
+		std::cout << "----------------------" << std::endl;
+		std::cout << "Adja meg a jarat szamat: ";
 		int line_num;
 		std::cin >> line_num;
-		if (std::cin.fail()) {
-			std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		if (std::cin.fail())
+		{
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			return;
 		}
 		std::cin.ignore();
-		
+
 		std::shared_ptr<Line> pLine = lines.get_line_by_number(line_num);
 		if (pLine != nullptr)
 		{
-			std::cout << "Adja meg az indulasi datumot az alabbi formaba:" << std::endl;
-			std::cout << "[YYYY-MM-DD HH:MM:SS]" << std::endl;
+			std::cout << "Adja meg az indulasi datumot [YYYY-MM-DD HH:MM:SS]: ";
 			std::string date_str;
 			std::getline(std::cin, date_str);
-			
+
 			std::tm t = {};
 			std::stringstream ss_dep(date_str);
 			ss_dep >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
@@ -341,21 +367,27 @@ void Menu::schedule_menu()
 				return;
 			}
 			std::chrono::system_clock::time_point date = std::chrono::system_clock::from_time_t(std::mktime(&t));
-			
-			std::cout << "Adja meg a vegallomas nevet: " << std::endl;
+
+			std::cout << "Adja meg a vegallomas nevet: ";
 			std::string last_stop;
 			std::getline(std::cin, last_stop);
 			std::shared_ptr<Stop> pLastStop = stops.get_stop_by_name(last_stop);
-			
-			if (pLastStop != nullptr) {
+
+			if (pLastStop != nullptr)
+			{
 				Schedule schedule(pLine, date, pLastStop);
 				bool deletion_code = schedules.remove(schedule);
-				if (deletion_code) {
+				if (deletion_code)
+				{
 					std::cout << "Sikeres menetrend torles." << std::endl;
-				} else {
+				}
+				else
+				{
 					std::cout << "Sikertelen menetrend torles. Ilyen menetrend nem letezik." << std::endl;
 				}
-			} else {
+			}
+			else
+			{
 				std::cout << "Nem letezik a megadott vegallomas." << std::endl;
 			}
 		}
@@ -370,24 +402,26 @@ void Menu::schedule_menu()
 	}
 }
 
-void Menu::find_routes() {
+void Menu::find_routes()
+{
 	std::cout << "Find routes nem elerheto meg" << std::endl;
 }
 
 void Menu::route_menu()
 {
+	std::cout << "----------------------" << std::endl;
 	std::cout << "Adja meg a kiindulasi megallot: " << std::endl;
 	std::string startstop;
 	std::getline(std::cin, startstop);
 	std::cout << "Adja meg a cel megallot: " << std::endl;
 	std::string endstop;
 	std::getline(std::cin, endstop);
-	
+
 	std::cout << "Adja meg az indulasi datumot az alabbi formaba:" << std::endl;
 	std::cout << "[YYYY-MM-DD HH:MM:SS]" << std::endl;
 	std::string date_str;
 	std::getline(std::cin, date_str);
-	
+
 	std::tm t = {};
 	std::stringstream ss_dep(date_str);
 	ss_dep >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
@@ -411,7 +445,7 @@ void Menu::save()
 
 void Menu::save_menu()
 {
-	std::cout << "Szeretne menteni a valtoztatasokat? (i/n)" << std::endl;
+	std::cout << "Szeretne menteni a valtoztatasokat? (i/n) ";
 	char confirm = std::cin.get();
 	std::cin.ignore();
 	if (confirm == 'i' || confirm == 'I')
@@ -430,7 +464,7 @@ void Menu::run()
 	int choice = -1;
 	while (choice != 0)
 	{
-		std::cout << "\n1. Megallok kezelese\n2. Jaratok kezelese\n3. Menetrendek kezelese\n4. Utvonal keresese\n5. Adatok manualis mentese\n0. Kilepes\nValasszon menupontot :" << std::endl;
+		std::cout << "\n1. Megallok kezelese\n2. Jaratok kezelese\n3. Menetrendek kezelese\n4. Utvonal keresese\n5. Adatok manualis mentese\n0. Kilepes\nValasszon menupontot: ";
 		std::cin >> choice;
 		if (std::cin.fail())
 		{
@@ -443,15 +477,15 @@ void Menu::run()
 		switch (choice)
 		{
 		case 1:
-			std::cout << "1. Uj megallo letrehozasa\n2. Megallok listazasa\n3. Megallo torlese\n0. Vissza\nValasszon menupontot :" << std::endl;
+			std::cout << "1. Uj megallo letrehozasa\n2. Megallok listazasa\n3. Megallo torlese\n0. Vissza\nValasszon menupontot: ";
 			stop_menu();
 			break;
 		case 2:
-			std::cout << "1. Uj jarat letrehozasa\n2. Jaratok listazasa\n3. Jarat torlese\n4. Jarat adatainak listazasa\n0. Vissza\nValasszon menupontot :" << std::endl;
+			std::cout << "1. Uj jarat letrehozasa\n2. Jaratok listazasa\n3. Jarat torlese\n4. Jarat adatainak listazasa\n0. Vissza\nValasszon menupontot: ";
 			line_menu();
 			break;
 		case 3:
-			std::cout << "1. Uj menetrend letrehozasa\n2. Menetrendek listazasa\n3. Menetrend torlese\n0. Vissza\nValasszon menupontot :" << std::endl;
+			std::cout << "1. Uj menetrend letrehozasa\n2. Menetrendek listazasa\n3. Menetrend torlese\n0. Vissza\nValasszon menupontot: ";
 			schedule_menu();
 			break;
 		case 4:

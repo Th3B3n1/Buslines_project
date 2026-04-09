@@ -13,6 +13,7 @@ private:
     ScheduleManager schedules;
     RouteManager routes;
 
+    int get_choice();
     void stop_menu();
     void line_menu();
     void schedule_menu();
@@ -22,7 +23,8 @@ private:
     void save_menu();
 
 public:
-    Menu() : routes(stops, lines) {
+    Menu() : routes(stops, lines)
+    {
         stops.process("megallok.txt");
         lines.process("jaratok.txt", stops);
         schedules.process("menetrendek.txt", lines, stops);
