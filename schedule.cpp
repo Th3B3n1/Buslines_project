@@ -8,30 +8,43 @@ bool ScheduleManager::process(const std::string &filepath, const LineManager& li
 	std::string unprocessed;
 	while (std::getline(file, unprocessed))
 	{
+		if (unprocessed.empty())
+			continue;
 		std::stringstream ss(unprocessed);
 		std::string line_num_str;
 		std::string last_stop_str;
 		std::string departure_str;
-
-		std::getline(ss, line_num_str, ';');
-		std::getline(ss, last_stop_str, ';');
-		std::getline(ss, departure_str, ';');
+		if (!std::getline(ss, line_num_str, ';') || !std::getline(ss, last_stop_str, ';') || !std::getline(ss, departure_str, ';'))
+		{
+			std::cout << "Invalid schedule row: " << unprocessed << std::endl;
+			continue;
+		}
 
 		std::shared_ptr<Line> line = linemanager.get_line_by_number(std::stoi(line_num_str));
 		std::shared_ptr<Stop> stop = stopmanager.get_stop_by_name(last_stop_str);
-		if (line != nullptr && stop != nullptr)
+		if (line == nullptr)
 		{
-			std::tm t = {};
-			std::stringstream ss_dep(departure_str);
-			ss_dep >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
-			std::chrono::system_clock::time_point date = std::chrono::system_clock::from_time_t(std::mktime(&t));
-			Schedule schedule(line, date, stop);
-			add(schedule);
+			std::cout << "Line " << line_num_str << " not found. Will skip current schedule." << std::endl;
+			continue;
 		}
-		else
+		if (stop == nullptr)
 		{
-			std::cout << "Line " << line_num_str << " or Stop " << last_stop_str << " not found. Will skip current schedule." << std::endl;
+			std::cout << "Stop " << last_stop_str << " not found. Will skip current schedule." << std::endl;
+			continue;
 		}
+
+		std::tm t = {};
+		std::stringstream ss_dep(departure_str);
+		ss_dep >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
+		if (ss_dep.fail())
+		{
+			std::cout << "Invalid departure time for line " << line_num_str << " and stop " << last_stop_str << ". Will skip current schedule." << std::endl;
+			continue;
+		}
+
+		std::chrono::system_clock::time_point date = std::chrono::system_clock::from_time_t(std::mktime(&t));
+		Schedule schedule(line, date, stop);
+		add(schedule);
 	}
 	file.close();
 	return true;
