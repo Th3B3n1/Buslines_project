@@ -10,7 +10,7 @@ bool StopManager::process(const std::string &filepath)
 	{
 		if (unprocessed.empty())
 			continue;
-		add(unprocessed);
+		add(Stop(unprocessed));
 	}
 	file.close();
 	return true;
@@ -65,7 +65,7 @@ bool StopManager::contains(const Stop &stop) const
 
 const std::shared_ptr<Stop> StopManager::get_stop_by_name(const std::string &stopname) const
 {
-	size_t index = find_index(stopname);
+	size_t index = find_index(Stop(stopname));
 	if (index == std::string::npos)
 		return nullptr;
 	return stoplist[index];
