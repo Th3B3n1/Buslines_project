@@ -32,7 +32,7 @@ void Menu::stop_menu()
 	case 2: {
 		std::cout << "A megallok listaja:" << std::endl;
 		stops.list();
-		std::cout << "-------------------" << std::endl;
+		std::cout << "----------------------" << std::endl;
 		break;
 	}
 	case 3: {
@@ -197,7 +197,7 @@ void Menu::line_menu()
 	case 2: {
 		std::cout << "A jaratok listaja:" << std::endl;
 		lines.list();
-		std::cout << "------------------" << std::endl;
+		std::cout << "----------------------" << std::endl;
 		break;
 	}
 	case 3: {

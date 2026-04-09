@@ -59,7 +59,9 @@ bool ScheduleManager::write_to_file(const std::string &filepath) const
 		return false;
 	for (size_t i = 0; i < schedulelist.size(); i++)
 	{
-		file << schedulelist[i]->get_line()->get_line_num() << ";" << schedulelist[i]->get_last_stop()->get_name() << ";" << schedulelist[i]->get_start().time_since_epoch().count() << "\n";
+		file << schedulelist[i]->get_line()->get_line_num() << ";"
+			 << schedulelist[i]->get_last_stop()->get_name() << ";"
+			 << utils::format_date(schedulelist[i]->get_start(), "%Y-%m-%d %H:%M:%S") << "\n";
 	}
 	file.close();
 	return true;
@@ -70,9 +72,9 @@ void ScheduleManager::list() const
 	for (size_t i = 0; i < schedulelist.size(); i++)
 	{
 		std::cout << "----------------------" << std::endl;
-		std::cout << "Jarat: " << schedulelist[i]->get_line()->get_line_num() << std::endl;
+		std::cout << "Jarat: " << schedulelist[i]->get_line()->get_formatted_line_num() << std::endl;
 		std::cout << "Vegallomas: " << schedulelist[i]->get_last_stop()->get_name() << std::endl;
-		std::cout << "Elso indulas: " << schedulelist[i]->get_start().time_since_epoch().count() << std::endl;
+		std::cout << "Elso indulas: " << utils::format_date(schedulelist[i]->get_start(), "%Y.%m.%d. %H:%M:%S") << std::endl;
 		std::cout << "----------------------" << std::endl;
 	}
 }

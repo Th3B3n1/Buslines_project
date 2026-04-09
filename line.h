@@ -48,6 +48,7 @@ public:
 
     const Line &get() const { return *this; }
     const int get_line_num() const { return line_num; }
+    const std::string get_formatted_line_num() const;
     const std::vector<LineStop> &get_stops() const { return stops; }
 
     bool add_stop(const std::shared_ptr<Stop> &stop, int minutes_from_terminus);

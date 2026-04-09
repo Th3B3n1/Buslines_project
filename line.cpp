@@ -23,6 +23,19 @@ bool Line::add_stop(const std::shared_ptr<Stop> &stop, int minutes_from_terminus
 	return true;
 }
 
+const std::string Line::get_formatted_line_num() const
+{
+	std::ostringstream oss;
+	int base_linenum = line_num / 10;
+	int suffix = (line_num % 10) - 1;
+	char suffix_char = (suffix >= 0 && suffix < 26) ? ('A' + suffix) : '?';
+	if (suffix > 0)
+		oss << base_linenum << suffix_char;
+	else
+		oss << base_linenum;
+	return oss.str();
+}
+
 void Line::clear_stops()
 {
 	stops.clear();
@@ -90,7 +103,7 @@ bool LineManager::process(const std::string &filepath, const StopManager &stopMa
 				break;
 			}
 
-			int travel_time_minutes = parse_minutes(travel_time_str);
+			int travel_time_minutes = utils::parse_minutes(travel_time_str);
 			std::shared_ptr<Stop> stop = stopManager.get_stop_by_name(stop_name_str);
 			if (!stop)
 			{
@@ -127,7 +140,7 @@ bool LineManager::write_to_file(const std::string &filepath) const
 		file << line->get_line_num() << ';' << line->get_type();
 		for (const LineStop &LineStop: line->get_stops())
 		{
-			file << ';' << LineStop.stop->get_name() << '#' << format_minutes(LineStop.minutes_from_terminus);
+			file << ';' << LineStop.stop->get_name() << '#' << utils::format_minutes(LineStop.minutes_from_terminus);
 		}
 		file << std::endl;
 	}
@@ -141,7 +154,7 @@ void LineManager::list() const
 	for (size_t i = 0; i < linelist.size(); i++)
 	{
 		std::cout << "----------------------" << std::endl;
-		std::cout << "Jarat: " << linelist[i]->get_line_num() << std::endl;
+		std::cout << "Jarat: " << linelist[i]->get_formatted_line_num() << std::endl;
 		std::cout << "Tipus: " << linelist[i]->get_type() << std::endl;
 		if (!linelist[i]->get_stops().empty())
 		{
@@ -164,11 +177,11 @@ void LineManager::list_line(int line_num) const
 		if (*linelist[i] == Line(line_num))
 		{
 			std::cout << "----------------------" << std::endl;
-			std::cout << "Jarat: " << linelist[i]->get_line_num() << std::endl;
+			std::cout << "Jarat: " << linelist[i]->get_formatted_line_num() << std::endl;
 			std::cout << "Tipus: " << linelist[i]->get_type() << std::endl;
 			for (const LineStop &stop : linelist[i]->get_stops())
 			{
-				std::cout << stop.stop->get_name() << " # " << format_minutes(stop.minutes_from_terminus) << std::endl;
+				std::cout << stop.stop->get_name() << " # " << utils::format_minutes(stop.minutes_from_terminus) << std::endl;
 			}
 			std::cout << "----------------------" << std::endl;
 			found = true;

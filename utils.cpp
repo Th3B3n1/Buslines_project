@@ -1,6 +1,6 @@
 #include "utils.h"
 
-int parse_minutes(const std::string &time_str)
+int utils::parse_minutes(const std::string &time_str)
 {
 	if (time_str.empty())
 		return -1;
@@ -14,7 +14,7 @@ int parse_minutes(const std::string &time_str)
 	return hours * 60 + minutes;
 }
 
-std::string format_minutes(int total_minutes)
+std::string utils::format_minutes(int total_minutes)
 {
 	if (total_minutes < 0)
 		return "00:00";
@@ -23,4 +23,24 @@ std::string format_minutes(int total_minutes)
 	std::ostringstream ss;
 	ss << std::setfill('0') << std::setw(2) << hours << ":" << std::setfill('0') << std::setw(2) << minutes;
 	return ss.str();
+}
+
+std::tm utils::to_local_tm(const std::chrono::system_clock::time_point &tp)
+{
+	std::time_t t = std::chrono::system_clock::to_time_t(tp);
+	std::tm local_tm = {};
+#ifdef _WIN32
+	localtime_s(&local_tm, &t);
+#else
+	localtime_r(&t, &local_tm);
+#endif
+	return local_tm;
+}
+
+std::string utils::format_date(const std::chrono::system_clock::time_point &tp, const char *pattern)
+{
+    std::tm local_tm = to_local_tm(tp);
+    std::ostringstream oss;
+    oss << std::put_time(&local_tm, pattern);
+    return oss.str();
 }
