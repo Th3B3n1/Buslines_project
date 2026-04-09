@@ -1,112 +1,173 @@
 #include "route_manager.h"
 
-int RouteManager::process(const std::string &filepath)
+void RouteManager::rebuild()
 {
-	std::ifstream file(filepath);
-	if (!file.is_open())
-		return -2;
-	std::string unprocessed;
-	while (std::getline(file, unprocessed))
+	connections.clear();
+
+	for (const std::shared_ptr<Line> &line : lineManager.get_linelist())
 	{
-		std::stringstream ss(unprocessed);
-		std::string line_num_str;
-		std::string next_str;
-		std::getline(ss, line_num_str, ';');
-		std::shared_ptr<Line> line = lineManager.get_line_by_number(std::stoi(line_num_str));
-		
-		while (std::getline(ss, next_str, ';'))
+		if (!line)
+			continue;
+
+		const std::vector<LineStop> &stops = line->get_stops();
+		if (stops.size() < 2)
+			continue;
+
+		for (size_t i = 1; i < stops.size(); i++)
 		{
-			std::string stop_name_str;
-			std::string travel_time_str;
-			std::stringstream ss2(next_str);
-			std::getline(ss2, stop_name_str, '#');
-			std::getline(ss2, travel_time_str, '#');
+			const std::shared_ptr<Stop> from_stop = stopManager.get_stop_by_name(stops[i - 1].stop->get_name());
+			const std::shared_ptr<Stop> to_stop = stopManager.get_stop_by_name(stops[i].stop->get_name());
+			if (!from_stop || !to_stop)
+				continue;
 
-			std::shared_ptr<Stop> stop = stopManager.get_stop_by_name(stop_name_str);
-			int travel_time_minutes = std::stoi(travel_time_str);
+			const int travel_time_minutes = stops[i].minutes_from_terminus - stops[i - 1].minutes_from_terminus;
+			if (travel_time_minutes < 0)
+				continue;
 
-			add(stop, line, travel_time_minutes);
+			add(from_stop, to_stop, line, travel_time_minutes);
 		}
 	}
-	file.close();
-	return 0;
 }
 
-int RouteManager::find_index(const Connection &conn) const
+size_t RouteManager::find_index(const std::shared_ptr<Stop> &from, const Connection &conn) const
 {
-	if (connections.empty())
-		return -2;
-	if (!conn)
-		return -2;
-	for (int i = 0; i < connections.size(); i++)
+	if (!from || !conn)
+		return std::string::npos;
+
+	std::unordered_map<const Stop *, std::vector<Connection>>::const_iterator map_it = connections.find(from.get());
+	if (map_it == connections.end())
+		return std::string::npos;
+
+	const std::vector<Connection> &stop_connections = map_it->second;
+	for (size_t i = 0; i < stop_connections.size(); i++)
 	{
-		if (connections[i] == conn)
-		{
+		if (stop_connections[i] == conn)
 			return i;
-		}
 	}
-	return -1;
+
+	return std::string::npos;
 }
 
-bool RouteManager::contains(const Connection &conn) const
+bool RouteManager::contains(const std::shared_ptr<Stop> &from, const Connection &conn) const
 {
-	if (connections.empty())
+	if (!from || !conn)
 		return false;
-	if (!conn)
+
+	std::unordered_map<const Stop *, std::vector<Connection>>::const_iterator map_it = connections.find(from.get());
+	if (map_it == connections.end())
 		return false;
-	for (int i = 0; i < connections.size(); i++)
+
+	const std::vector<Connection> &vec = map_it->second;
+	return std::find(vec.begin(), vec.end(), conn) != vec.end();
+}
+
+bool RouteManager::add(const std::shared_ptr<Stop> &from, const std::shared_ptr<Stop> &to, const std::shared_ptr<Line> &line, int travel_time_minutes)
+{
+	if (!from || !to || !line)
+		return false;
+	if (!stopManager.contains(*from) || !stopManager.contains(*to) || !lineManager.contains(*line))
+		return false;
+	if (travel_time_minutes < 0)
+		return false;
+
+	Connection conn{to, line, travel_time_minutes};
+	if (contains(from, conn))
+		return false;
+
+	connections[from.get()].push_back(conn);
+	return true;
+}
+
+bool RouteManager::remove(const std::shared_ptr<Stop> &from, const std::shared_ptr<Stop> &to, const std::shared_ptr<Line> &line)
+{
+	if (!from || !to || !line)
+		return false;
+
+	std::unordered_map<const Stop *, std::vector<Connection>>::iterator map_it = connections.find(from.get());
+	if (map_it == connections.end())
+		return false;
+
+	std::vector<Connection> &vec = map_it->second;
+	Connection target_conn{to, line, 0};
+	std::vector<Connection>::iterator vec_it = std::find(vec.begin(), vec.end(), target_conn);
+	if (vec_it == vec.end())
+		return false;
+
+	vec.erase(vec_it);
+	if (vec.empty())
+		connections.erase(map_it);
+
+	return true;
+}
+
+std::vector<Connection> RouteManager::find_connections_by_nodestop(const std::shared_ptr<Stop> &stop) const
+{
+	if (!stop)
+		return {};
+	std::unordered_map<const Stop *, std::vector<Connection>>::const_iterator map_it = connections.find(stop.get());
+	if (map_it == connections.end())
+		return {};
+	return map_it->second;
+}
+
+std::vector<Connection> RouteManager::find_connections_by_connectionstop(const std::shared_ptr<Stop> &stop) const
+{
+	if (!stop)
+		return {};
+	std::vector<Connection> result;
+	for (const std::pair<const Stop *const, std::vector<Connection>> &pair : connections)
 	{
-		if (connections[i] == conn)
+		const std::vector<Connection> &stop_connections = pair.second;
+		for (const Connection &conn : stop_connections)
 		{
-			return true;
+			if (*conn.get_stop() == *stop)
+				result.push_back(conn);
 		}
 	}
-	return false;
+	return result;
 }
 
-int RouteManager::add(const std::shared_ptr<Stop> &stop, const std::shared_ptr<Line> &line, int travel_time_minutes)
+std::vector<Connection> RouteManager::find_connections_by_line(const std::shared_ptr<Line> &line) const
 {
-	if (!stop || !line)
-		return -2;
-	if (!stopManager.contains(*stop) || !lineManager.contains(*line))
-		return -1;
-	if (contains({stop, line, travel_time_minutes}))
-		return -1;
-	connections.push_back({stop, line, travel_time_minutes});
-	return 0;
-}
-
-int RouteManager::remove(const std::shared_ptr<Stop> &stop, const std::shared_ptr<Line> &line)
-{
-	if (!stop || !line)
-		return -2;
-	if (!stopManager.contains(*stop) || !lineManager.contains(*line))
-		return -1;
-	int index = find_index({stop, line, 0});
-	if (index == -1)
-		return -1;
-	connections.erase(connections.begin() + index);
-	return 0;
+	if (!line)
+		return {};
+	std::vector<Connection> result;
+	for (const std::pair<const Stop *const, std::vector<Connection>> &pair : connections)
+	{
+		const std::vector<Connection> &stop_connections = pair.second;
+		for (const Connection &conn : stop_connections)
+		{
+			if (*conn.get_line() == *line)
+				result.push_back(conn);
+		}
+	}
+	return result;
 }
 
 /*
-int write_lines_to_file(const LineList *linelist, const char *filepath)
+bool RouteManager::write_to_file(const std::string &filepath) const
 {
-	if (!linelist)
-		return -2;
+	if (connections.empty())
+		return false;
+
 	std::ofstream file(filepath);
 	if (!file.is_open())
-		return -2;
-	for (int i = 0; i < linelist->count; i++)
+		return false;
+
+	for (const std::pair<const Stop *, std::vector<Connection>> &pair : connections)
 	{
-		file << linelist->lines[i].line_num << ";" << linelist->lines[i].version;
-		for (int y = 0; y < linelist->lines[i].stoplist->count; y++)
+		const Stop *from_stop = pair.first;
+		const std::vector<Connection> &stop_connections = pair.second;
+		for (const Connection &conn : stop_connections)
 		{
-			file << ";" << linelist->lines[i].stoplist->stops[y].stop->name << "#" << std::setfill('0') << std::setw(2) << linelist->lines[i].stoplist->stops[y].time_from_terminus.hours << ":" << std::setfill('0') << std::setw(2) << linelist->lines[i].stoplist->stops[y].time_from_terminus.minutes;
+			file << from_stop->get_name() << ';'
+				 << conn.get_line()->get_line_num() << ';'
+				 << conn.get_stop()->get_name() << '#'
+				 << conn.get_travel_time_minutes() << std::endl;
 		}
-		file << "\n";
 	}
+
 	file.close();
-	return 0;
+	return true;
 }
 */

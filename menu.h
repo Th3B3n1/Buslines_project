@@ -24,9 +24,9 @@ private:
 public:
     Menu() : routes(stops, lines) {
         stops.process("megallok.txt");
-        lines.process("jaratok.txt");
-        schedules.process("menetrendek.txt");
-        routes.process("jaratok.txt");
+        lines.process("jaratok.txt", stops);
+        schedules.process("menetrendek.txt", lines, stops);
+        routes.rebuild();
     }
     void run();
     void exit();

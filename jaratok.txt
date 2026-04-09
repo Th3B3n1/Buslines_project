@@ -1,0 +1,2 @@
+1070;Bus;Keleti palyaudvar M#00:00;Huszar utca#00:01;Blaha Lujza ter M#00:03;Urania#00:05;Astoria M#00:06;Ferenciek tere M#00:08;Marcius 15. ter#00:08;Rudas Gyogyfurdo#00:10;Szent Gellert ter - Muegyetem M#00:13;Petofi hid, budai hidfo#00:15;Egyetemvaros - A38 hajoallomas#00:16;Magyar tudosok korutja#00:16;Infopark (Pazmany Peter setany)#00:17;BudaPart#00:19
+0075;Bus;Ujpalota, Nyirpalota ut#00:00;Vasarcsarnok#00:02;Fo ter#00:04;Molnar Viktor utca#00:06;Bosnyak ter#00:10;Zuglo vasutallomas#00:13;Keleti palyaudvar M#00:17;Blaha Lujza ter M#00:20;Blaha Lujza ter M#00:21

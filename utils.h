@@ -15,3 +15,6 @@
 #include <unordered_map>
 #include <algorithm>
 #include <iomanip>
+
+int parse_minutes(const std::string &time_str);
+std::string format_minutes(int total_minutes);

@@ -1,0 +1,3 @@
+1070;BudaPart;2025-11-23 13:00:00
+1070;BudaPart;2025-11-23 13:23:00
+0075;Albertfalva vasutallomas;2025-11-23 13:00:00
