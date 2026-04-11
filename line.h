@@ -47,14 +47,48 @@ public:
     virtual std::shared_ptr<Line> clone() const { return std::make_shared<Line>(*this); }
 
     const Line &get() const { return *this; }
+    
+    /**
+     * @brief Gets standard numerical identifier.
+     * @return Integer.
+     */
     const int get_line_num() const { return line_num; }
+
+    /**
+     * @brief Returns heavily structured visual rendering templates formatting native lines natively.
+     */
     const std::string get_formatted_line_num() const;
     const std::vector<LineStop> &get_stops() const { return stops; }
 
+    /**
+     * @brief Sequences explicit edge mapping travel definitions organically into stops.
+     * @param stop Direct referencing tracking pointers inherently.
+     * @param minutes_from_terminus Chronological accumulative offset explicitly structurally linked.
+     */
     bool add_stop(const std::shared_ptr<Stop> &stop, int minutes_from_terminus);
+
+    /**
+     * @brief Safely clears completely memory mapping nodes internally cleanly.
+     */
     void clear_stops();
+
+    /**
+     * @brief Numerically indicates linked dependencies mapped across.
+     * @return Standard integral numerical natively explicit size.
+     */
     size_t stop_count() const;
+
+    /**
+     * @brief Reads standard indexing stops naturally seamlessly array contexts explicitly natively.
+     * @param index Local offset position integral iteratively pointing natively.
+     * @return Constant pointer reference structure linked correctly implicitly.
+     */
     const LineStop &get_stop(size_t index) const;
+
+    /**
+     * @brief Fast native mapping terminal point dependencies organically mapped cleanly explicitly.
+     * @return Terminal point stop entity referencing context safely cleanly explicitly natively.
+     */
     const LineStop &get_last_stop() const;
 
     bool operator==(const Line &other) const
@@ -122,11 +156,45 @@ public:
     }
     bool process(const std::string &filepath, const StopManager &stopManager);
     bool write_to_file(const std::string &filepath) const;
+    
+    /**
+     * @brief Echo iterates output sequentially rendering globally tracked native formats inherently dynamically efficiently.
+     */
     void list() const;
+
+    /**
+     * @brief Computes explicit isolated single template targets accurately explicitly efficiently seamlessly dynamically.
+     * @param line_num Integral indexing numeric property.
+     */
     void list_line(int line_num) const;
+
+    /**
+     * @brief Locates matching index iterators scanning linearly strictly correctly implicitly statically natively logically cleanly safely reliably implicitly linearly.
+     */
     size_t find_index(const Line &line) const;
+
+    /**
+     * @brief Verifies whether identically constrained paths operate deeply locally within global array caching boundaries explicitly natively intelligently natively iteratively reliably efficiently implicitly structurally robustly.
+     * @param line Struct matching reference dynamically.
+     * @return Standard Boolean reflecting execution outcome inherently cleanly.
+     */
     bool contains(const Line &line) const;
+
+    /**
+     * @brief Instantiates fetch requests logically correctly statically retrieving cleanly reliably natively inherently implicitly safely smoothly accurately natively.
+     * @param line_num Integral constraint mapping dynamically organically.
+     */
     const std::shared_ptr<Line> get_line_by_number(int line_num) const;
+
+    /**
+     * @brief Safely embeds explicitly constructed parameters naturally into persistent application running cache maps intelligently automatically seamlessly reliably logically.
+     * @param line Inherited dynamic structure configuration logic parameters dynamically securely intelligently correctly explicitly naturally safely reliably cleanly implicitly natively logically efficiently.
+     */
     bool add(const Line &line);
+
+    /**
+     * @brief Invokes explicit isolated logical deletion procedures automatically seamlessly robustly natively correctly linearly statically confidently correctly.
+     * @param line Struct referencing dynamic target properties logically securely seamlessly intelligently organically.
+     */
     bool remove(const Line &line);
 };

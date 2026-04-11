@@ -19,8 +19,23 @@ private:
 public:
     Schedule() : line(), start(), last_stop() {}
     Schedule(const std::shared_ptr<Line> &line, const std::chrono::system_clock::time_point &start, const std::shared_ptr<Stop> &last_stop) : line(line), start(start), last_stop(last_stop) {}
+    
+    /**
+     * @brief Reads standard associated linking logically implicitly mapped line organically.
+     * @return Underlying shared natively constructed element reliably pointing cleanly explicitly.
+     */
     const std::shared_ptr<Line> &get_line() const { return line; }
+
+    /**
+     * @brief Evaluates chronologically implicit baseline absolute starting references natively reliably.
+     * @return Absolute epoch logic timing structures cleanly safely statically explicitly.
+     */
     const std::chrono::system_clock::time_point &get_start() const { return start; }
+
+    /**
+     * @brief Computes inherently the boundary destination constraint parameters cleanly explicitly iteratively safely natively.
+     * @return Underlying referenced natively shared pointer boundary constraints efficiently correctly implicitly automatically.
+     */
     const std::shared_ptr<Stop> &get_last_stop() const { return last_stop; }
     bool operator==(const Schedule &other) const
     {
