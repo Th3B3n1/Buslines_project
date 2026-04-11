@@ -5,6 +5,7 @@
 #include "line.h"
 #include "stop.h"
 
+#ifdef CPORTA
 int main()
 {
     TEST(UtilsTest, ParseMinutesNormal)
@@ -156,8 +157,8 @@ int main()
         bool success = sm.process("temp_stops.txt");
         EXPECT_TRUE(success);
         EXPECT_EQ((size_t)3, sm.get_stoplist().size());
-        EXPECT_NE(nullptr, sm.get_stop_by_name("Keleti palyaudvar").get());
-        EXPECT_NE(nullptr, sm.get_stop_by_name("Ede utca").get());
+        EXPECT_TRUE(sm.get_stop_by_name("Keleti palyaudvar") != nullptr);
+        EXPECT_TRUE(sm.get_stop_by_name("Ede utca") != nullptr);
         
         std::remove("temp_stops.txt");
     END
@@ -246,3 +247,4 @@ int main()
 
     return 0;
 }
+#endif

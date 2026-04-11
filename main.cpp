@@ -1,5 +1,6 @@
 #include "menu.h"
 
+#ifndef CPORTA
 int main()
 {
 	Menu menu;
@@ -7,3 +8,4 @@ int main()
 	menu.exit();
 	return 0;
 }
+#endif

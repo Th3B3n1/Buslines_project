@@ -41,5 +41,5 @@ clean:
 	$(CLEAN_CMD)
 
 test:
-	$(CXX) -g -Wall -Werror -pedantic $(TEST_SRCS) -o test_runner.exe
+	$(CXX) -DCPORTA -g -Wall -Werror -pedantic $(TEST_SRCS) -o test_runner.exe
 	./test_runner.exe
