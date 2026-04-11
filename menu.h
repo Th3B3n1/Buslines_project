@@ -17,13 +17,12 @@ private:
     void stop_menu();
     void line_menu();
     void schedule_menu();
-    void find_routes();
     void route_menu();
     void save();
     void save_menu();
 
 public:
-    Menu() : routes(stops, lines)
+    Menu() : routes(stops, lines, schedules)
     {
         stops.process("megallok.txt");
         lines.process("jaratok.txt", stops);

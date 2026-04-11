@@ -100,17 +100,7 @@ bool RouteManager::remove(const std::shared_ptr<Stop> &from, const std::shared_p
 	return true;
 }
 
-std::vector<Connection> RouteManager::find_connections_by_nodestop(const std::shared_ptr<Stop> &stop) const
-{
-	if (!stop)
-		return {};
-	std::unordered_map<const Stop *, std::vector<Connection>>::const_iterator map_it = connections.find(stop.get());
-	if (map_it == connections.end())
-		return {};
-	return map_it->second;
-}
-
-std::vector<Connection> RouteManager::find_connections_by_connectionstop(const std::shared_ptr<Stop> &stop) const
+const std::vector<Connection> RouteManager::find_connections_by_connectionstop(const std::shared_ptr<Stop> &stop) const
 {
 	if (!stop)
 		return {};
@@ -127,47 +117,100 @@ std::vector<Connection> RouteManager::find_connections_by_connectionstop(const s
 	return result;
 }
 
-std::vector<Connection> RouteManager::find_connections_by_line(const std::shared_ptr<Line> &line) const
+const std::vector<Connection> RouteManager::find_routes(const std::shared_ptr<Stop> &from, const std::shared_ptr<Stop> &to, const std::chrono::system_clock::time_point &departure_time) const
 {
-	if (!line)
+	if (!from || !to)
 		return {};
-	std::vector<Connection> result;
-	for (const std::pair<const Stop *const, std::vector<Connection>> &pair : connections)
+
+	const std::vector<std::shared_ptr<Schedule>> &all_schedules = scheduleManager.get_schedulelist();
+	std::unordered_map<const Line *, std::vector<std::chrono::system_clock::time_point>> line_departures;
+
+	for (size_t i = 0; i < all_schedules.size(); i++)
 	{
-		const std::vector<Connection> &stop_connections = pair.second;
-		for (const Connection &conn : stop_connections)
+		line_departures[all_schedules[i]->get_line().get()].push_back(all_schedules[i]->get_start());
+	}
+
+	for (std::unordered_map<const Line *, std::vector<std::chrono::system_clock::time_point>>::iterator it = line_departures.begin(); it != line_departures.end(); ++it)
+	{
+		std::sort(it->second.begin(), it->second.end());
+	}
+
+	std::priority_queue<std::pair<int, const Stop *>, std::vector<std::pair<int, const Stop *>>, std::greater<std::pair<int, const Stop *>>> pq;
+	std::unordered_map<const Stop *, int> best_times;
+	std::unordered_map<const Stop *, std::pair<const Stop *, Connection>> came_from;
+
+	pq.push({0, from.get()});
+	best_times[from.get()] = 0;
+
+	while (!pq.empty())
+	{
+		int current_time = pq.top().first;
+		const Stop *current_stop = pq.top().second;
+		pq.pop();
+
+		if (*current_stop == *to)
+			break;
+
+		if (current_time > best_times[current_stop])
+			continue;
+
+		std::unordered_map<const Stop *, std::vector<Connection>>::const_iterator map_it = connections.find(current_stop);
+		if (map_it == connections.end())
+			continue;
+
+		for (const Connection &conn : map_it->second)
 		{
-			if (*conn.get_line() == *line)
-				result.push_back(conn);
+			const Stop *neighbor = conn.get_stop().get();
+			const Line *route_line = conn.get_line().get();
+
+			int offset_from_terminus = -1;
+			const std::vector<LineStop> &line_stops = route_line->get_stops();
+			for (size_t i = 0; i < line_stops.size(); i++)
+			{
+				if (*line_stops[i].stop == *current_stop)
+				{
+					offset_from_terminus = line_stops[i].minutes_from_terminus;
+					break;
+				}
+			}
+
+			if (offset_from_terminus == -1 || line_departures.find(route_line) == line_departures.end())
+				continue;
+
+			std::chrono::system_clock::time_point needed_terminus_departure = departure_time + std::chrono::minutes(current_time - offset_from_terminus);
+
+			const std::vector<std::chrono::system_clock::time_point> &deps = line_departures[route_line];
+			std::vector<std::chrono::system_clock::time_point>::const_iterator next_bus_it = std::lower_bound(deps.begin(), deps.end(), needed_terminus_departure);
+
+			if (next_bus_it == deps.end())
+				continue;
+
+			std::chrono::system_clock::time_point bus_leaves_stop_at = *next_bus_it + std::chrono::minutes(offset_from_terminus);
+
+			int wait_time = std::chrono::duration_cast<std::chrono::minutes>(bus_leaves_stop_at - (departure_time + std::chrono::minutes(current_time))).count();
+			int new_time = current_time + wait_time + conn.get_travel_time_minutes();
+
+			if (best_times.find(neighbor) == best_times.end() || new_time < best_times[neighbor])
+			{
+				best_times[neighbor] = new_time;
+				came_from[neighbor] = {current_stop, conn};
+				pq.push({new_time, neighbor});
+			}
 		}
 	}
+
+	if (came_from.find(to.get()) == came_from.end())
+		return {};
+
+	std::vector<Connection> result;
+	const Stop *curr = to.get();
+	while (*curr != *from)
+	{
+		result.push_back(came_from[curr].second);
+		curr = came_from[curr].first;
+	}
+
+	std::reverse(result.begin(), result.end());
+
 	return result;
 }
-
-/*
-bool RouteManager::write_to_file(const std::string &filepath) const
-{
-	if (connections.empty())
-		return false;
-
-	std::ofstream file(filepath);
-	if (!file.is_open())
-		return false;
-
-	for (const std::pair<const Stop *, std::vector<Connection>> &pair : connections)
-	{
-		const Stop *from_stop = pair.first;
-		const std::vector<Connection> &stop_connections = pair.second;
-		for (const Connection &conn : stop_connections)
-		{
-			file << from_stop->get_name() << ';'
-				 << conn.get_line()->get_line_num() << ';'
-				 << conn.get_stop()->get_name() << '#'
-				 << conn.get_travel_time_minutes() << std::endl;
-		}
-	}
-
-	file.close();
-	return true;
-}
-*/

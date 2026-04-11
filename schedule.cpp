@@ -1,6 +1,6 @@
 #include "schedule.h"
 
-bool ScheduleManager::process(const std::string &filepath, const LineManager& linemanager, const StopManager& stopmanager)
+bool ScheduleManager::process(const std::string &filepath, const LineManager &linemanager, const StopManager &stopmanager)
 {
 	std::ifstream file(filepath);
 	if (!file.is_open())

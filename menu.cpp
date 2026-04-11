@@ -402,23 +402,40 @@ void Menu::schedule_menu()
 	}
 }
 
-void Menu::find_routes()
-{
-	std::cout << "Find routes nem elerheto meg" << std::endl;
-}
-
 void Menu::route_menu()
 {
 	std::cout << "----------------------" << std::endl;
-	std::cout << "Adja meg a kiindulasi megallot: " << std::endl;
+	std::cout << "Adja meg a kiindulasi megallot: ";
 	std::string startstop;
 	std::getline(std::cin, startstop);
-	std::cout << "Adja meg a cel megallot: " << std::endl;
+	if (startstop.empty())
+	{
+		std::cout << "Nem megfelelo input." << std::endl;
+		return;
+	}
+	const std::shared_ptr<Stop> start = stops.get_stop_by_name(startstop);
+	if (start == nullptr)
+	{
+		std::cout << "Nem letezik a kiindulasi megallo." << std::endl;
+		return;
+	}
+
+	std::cout << "Adja meg a cel megallot: ";
 	std::string endstop;
 	std::getline(std::cin, endstop);
+	if (endstop.empty())
+	{
+		std::cout << "Nem megfelelo input." << std::endl;
+		return;
+	}
+	const std::shared_ptr<Stop> end = stops.get_stop_by_name(endstop);
+	if (end == nullptr)
+	{
+		std::cout << "Nem letezik a cel megallo." << std::endl;
+		return;
+	}
 
-	std::cout << "Adja meg az indulasi datumot az alabbi formaba:" << std::endl;
-	std::cout << "[YYYY-MM-DD HH:MM:SS]" << std::endl;
+	std::cout << "Adja meg az indulasi datumot [YYYY-MM-DD HH:MM:SS]: ";
 	std::string date_str;
 	std::getline(std::cin, date_str);
 
@@ -431,9 +448,40 @@ void Menu::route_menu()
 		return;
 	}
 	std::chrono::system_clock::time_point date = std::chrono::system_clock::from_time_t(std::mktime(&t));
-	(void)date; // Suppress unused logic compiler warning since Route algorithm is not fully implemented
-	// Hely a Route algorithmusnak.
-	std::cout << "Nincsen megjelenitheto utvonal." << std::endl;
+	const std::vector<Connection> route = routes.find_routes(start, end, date);
+	if (route.empty())
+	{
+		std::cout << "Nincsen megjelenitheto utvonal." << std::endl;
+	}
+	int total_minutes = 0;
+	size_t i = 0;
+	while (i < route.size())
+	{
+		const std::shared_ptr<Line> current_line = route[i].get_line();
+		std::string start_stop_name = (i == 0) ? start->get_name() : route[i - 1].get_stop()->get_name();
+
+		int segment_start_time = total_minutes;
+
+		while (i < route.size() && route[i].get_line() == current_line)
+		{
+			total_minutes += route[i].get_travel_time_minutes();
+			i++;
+		}
+
+		std::string end_stop_name = route[i - 1].get_stop()->get_name();
+
+		std::chrono::system_clock::time_point board_time = date + std::chrono::minutes(segment_start_time);
+		std::chrono::system_clock::time_point get_off_time = date + std::chrono::minutes(total_minutes);
+
+		std::cout << current_line->get_formatted_line_num() << ": "
+				  << current_line->get_stops()[0].stop->get_name() << " -> "
+				  << current_line->get_last_stop().stop->get_name() << std::endl;
+		std::cout << "\n\tFelszallas: " << start_stop_name
+				  << " (" << utils::format_date(board_time, "%H:%M") << ")" << std::endl;
+		std::cout << "\n\tLeszallas: " << end_stop_name
+				  << " (" << utils::format_date(get_off_time, "%H:%M") << ")\n"
+				  << std::endl;
+	}
 }
 
 void Menu::save()
